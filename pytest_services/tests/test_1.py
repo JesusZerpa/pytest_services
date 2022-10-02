@@ -74,7 +74,7 @@ def client3(app):
 @pytest.fixture(scope="session")
 def service(client):
     from quart import jsonify
-    return service=Service(client,
+    return Service(client,
         name="Servicio 1",
         test=True,
         scope="debug",
@@ -82,7 +82,7 @@ def service(client):
 
 @pytest.fixture(scope="session")
 def service2(client2):
-    return service2=Service(client2,
+    return Service(client2,
         name="Servicio 2",
         test=True,
         scope="debug",
@@ -90,7 +90,7 @@ def service2(client2):
 
 @pytest.fixture(scope="session")
 def service3(client3):
-    return service3=Service(client3,
+    return Service(client3,
         name="Servicio 2",
         test=True,
         scope="debug",

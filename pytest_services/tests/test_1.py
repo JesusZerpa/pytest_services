@@ -1,5 +1,6 @@
 from pytest_services import Controller
 from pytest_services import Service
+import pytest
 
 
 
@@ -137,7 +138,7 @@ def create_routes(app,app2,app3):
         from quart import request
         #paso 1
         
-        service.check("Iniciando")
+        await service.check("Iniciando")
 
         service2.post("/webhook/app2",json={
             "step":1

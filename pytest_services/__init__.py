@@ -295,6 +295,7 @@ class Service:
         self.url=None
         self.name=name
         self.host=host
+        self.controller=None
         self.command=command
         if type(app)==str:
             #se pasa la url del controlador
@@ -365,32 +366,36 @@ class Service:
                 print(e)
 
         
-    def __call__(self,checkpoint,validator=None,description="",socketio=False):
+    def __call__(self,checkpoint,validator_decorator=None,description="",socketio=False):
         """
         Decorador utilizado para rutas 
         """
-        async def decorador(fn):
+        from functools import wraps
+        def decorador2(fn):
+           
             from easy_validator import  ValidationError,ValidationRequired
+            @wraps(fn)
             async def wrapper(*args,**kwargs):
-                
+              
                 try:
-                    if not socketio:
+                    async def testing(*args,**kwargs):
                         from quart import request
                         data=await request.json
-                        if validator:
-                            validator.validate(data)
-                    else:
-                        if validator:
-                            validator.validate(args[0])
-                    self.check(checkpoint,True,"Decorator success")
-                    return fn
+                    value=await validator_decorator(testing)
+                    await self.check(checkpoint,value,"Decorator success")
+                   
                 except ValidationError as e:
-                    self.check(checkpoint,False,"ValidationError: "+str(e))
-                    return fn
+                  
+                    await self.check(checkpoint,False,"ValidationError: "+str(e))
+              
                 except ValidationRequired as e:
-                    self.check(checkpoint,False,"ValidationRequired: "+str(e))
-                return await fn(*args,**kwargs) 
+                  
+                    await self.check(checkpoint,False,"ValidationRequired: "+str(e))
+                except Exception as e: 
+                  
+                    await self.check(checkpoint,False,"Exception: "+str(e))
+                return await fn(*args,**kwargs)
             return wrapper
 
 
-        return decorador
+        return decorador2

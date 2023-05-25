@@ -1,2 +1,3 @@
 pytest_services/__pycache__
 pytest_services.egg-info
+pytest_services/tests/__pycache__

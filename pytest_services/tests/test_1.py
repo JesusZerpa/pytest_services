@@ -1,13 +1,21 @@
 from pytest_services import Controller
 from pytest_services import Service
 import pytest
+"""
+En este test estaremos probando la funcionalidad de chequeo de pasos
+en multiples aplicativos, esto sirve cuando se trabaja en red donde 
+
+A -> B : check (A in B)
+B -> C : check (B in C)
+C -> A : check (C in A)
+
+"""
 
 
 
 @pytest.fixture(scope="session")
 def app():
     from easy_validator import UtilValidator
-    from server.validators import horarios_validator
     from quart import request,jsonify
     from server import app
     
@@ -28,11 +36,10 @@ def client(app):
 
 
 @pytest.fixture(scope="session")
-def app2():
+def app2(app):
     from easy_validator import UtilValidator
-    from server.validators import horarios_validator
     from quart import request,jsonify
-    from server import app
+
     
     app.config.update({
         "TESTING": True,
@@ -67,7 +74,9 @@ def app3():
 
     # clean up / reset resources here
 
-
+@pytest.fixture(scope="session")
+def controller(app):
+    return Controller()
 @pytest.fixture(scope="session")
 def client3(app):
     return app.test_client()
@@ -101,17 +110,10 @@ def service3(client3):
 @pytest.fixture(scope="session")
 def build_services(service,service2,service3):
     
-    service.join(service2,service3)
+    
 
-    service3.step("Iniciando Rutinas")
-    service2.step("Iniciando")
-    service2.step("param=='app2'")
-    service2.step("data['step']==1")
-    service3.step("param=='app3'")
-    service3.step("data['step']==2")
-
-@pytest.fixture(scope="session")
-def create_routes(app,app2,app3):
+@pytest.mark.asyncio
+async def test_1(app,app2,app3):
     from quart import jsonify
 
     @app3.route("/webhook/<param>")
@@ -167,6 +169,15 @@ def create_routes(app,app2,app3):
             "step":2
             })
         return jsonify({})
+
+    controller.join(service2,service3)
+
+    service3.step("Iniciando Rutinas")
+    service2.step("Iniciando")
+    service2.step("param=='app2'")
+    service2.step("data['step']==1")
+    service3.step("param=='app3'")
+    service3.step("data['step']==2")
 
 def test_routine(service,service2,service3):
     

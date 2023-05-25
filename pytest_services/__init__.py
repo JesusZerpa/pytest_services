@@ -124,7 +124,6 @@ class Controller:
             if not self.blocked:
                 for thread in self.group.pool:
                     breaked=True
-                    print("nnnnnnn",data)
                     for k,step in enumerate(thread.pool):
                         if k>0:
                             if thread[k-1].checked:
@@ -235,7 +234,7 @@ class Controller:
 
     def join(self,*services):
         names=[]
-        print("EEEEEEEE")
+        print("EEEEEEEE ",services)
         for elem in services:
             if elem.name in names:
                 raise Exception("Nombre de servicio ya existe")
@@ -262,9 +261,13 @@ class Controller:
                 self.processes[service.name]=p
         """
         if self.host:
-            self.thread=Thread(target=self.app.run,args=(self.host,self.port,True),daemon=True)
+            """
+            self.thread=Thread(target=self.app.run,args=(self.host,self.port,False),daemon=True)
             self.thread.start()
+            """
+            print("jjjjjjjj")
         else:
+            print("++++++++++++")
             self.client=self.app.test_client()
     def test(self):
         global dbs
@@ -373,7 +376,7 @@ class Service:
         from functools import wraps
         def decorador2(fn):
            
-            from easy_validator import  ValidationError,ValidationRequired
+            from my_validator import  ValidationError,ValidationRequired
             @wraps(fn)
             async def wrapper(*args,**kwargs):
               

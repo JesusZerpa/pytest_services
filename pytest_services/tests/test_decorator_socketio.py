@@ -1,5 +1,5 @@
 import pytest
-import socketio
+import socketio,asyncio
 from socketio import ASGIApp
 from socketio.asyncio_client import AsyncClient
 from multiprocessing import  Process
@@ -33,6 +33,9 @@ def app():
 
 @pytest.fixture(scope="session")
 def controller():
+    """
+    Creo el controlador al cual se estaran reportando los servicios
+    """
     from pytest_services import Controller
 
     return Controller()
@@ -45,7 +48,7 @@ def client(app):
 def service(client,controller):
     from quart import jsonify
     from pytest_services import Service
-
+    print("zzzzzzzz",service)
 
     return Service(client,
         name="Servicio 1",
@@ -66,8 +69,7 @@ def sio(service):
     return sio
 
 def run_server(app,sio):
-    
-    from asgi import  app
+
     app = socketio.ASGIApp(sio, app, static_files={
         '/': 'app.html',
     })
@@ -86,9 +88,17 @@ def server(app,sio):
 
 
 @pytest.mark.asyncio
-async def test_read_main(server,client,controller):
+async def test_read_main(server,client,controller,service):
+    """
+    Prueba basica de Lectura
+    """
+    #Creo la prueba
     controller.join(service)
+    @controller.env
+    def escribir(data):
+
     controller.run()
+    
     await asyncio.sleep(5)
 
     client=AsyncClient()
@@ -96,7 +106,8 @@ async def test_read_main(server,client,controller):
     await client.emit("escribir",{"mi2":"data"})
     await asyncio.sleep(5)
 
-    raise
+
+    
 
 """
 @pytest.fixture(scope="session")
@@ -116,7 +127,7 @@ def app():
     # clean up / reset resources here
 """
 
-
+'''
 
 def build_steps(service,controller):
     controller.join(service)
@@ -154,7 +165,7 @@ def build_routes2(app,service):
 
     @app.route("/webhook",methods=["POST"])
     @service("/webhook",validator,"desde una ruta")
-    async def route():
+    async def webhook():
         from quart import request,jsonify
         data=await request.json
         
@@ -196,4 +207,4 @@ async def test_decorator(app,service,controller):
     assert controller.test()
     
 
-    
+'''

@@ -70,8 +70,12 @@ def run_server(app,sio):
     app = socketio.ASGIApp(sio, app, static_files={
         '/': 'app.html',
     })
-
-    uvicorn.run(app,host='127.0.0.1', port=8000)
+    t=threading.Thread(
+        target=lambda app:uvicorn.run(
+            app,host='127.0.0.1', port=8000),
+        args=(app,))
+    t.start()
+    
 
 @pytest.fixture(scope="session")
 def server(app,sio):
